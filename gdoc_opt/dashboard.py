@@ -20,26 +20,198 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Dark Mode / Premium CSS Injection
+# Custom Styling for modern dark theme and glassmorphism cards
 st.markdown("""
-    <style>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Sora:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap');
+    
+    html, body, [class*="css"], .stApp {
+        background: radial-gradient(circle at 50% 50%, #110926 0%, #050505 100%) !important;
+        background-attachment: fixed !important;
+        color: #ffffff;
+        font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    
     .main {
-        background-color: #0e1117;
-        color: #fafafa;
+        background-color: transparent !important;
+        color: #ffffff;
     }
-    h1, h2, h3 {
-        color: #fafafa !important;
-        font-family: 'Outfit', sans-serif;
+    
+    /* Typography Hierarchy */
+    h1 {
+        font-size: 2.2rem !important;
+        font-family: 'Sora', sans-serif !important;
+        font-weight: 700 !important;
+        letter-spacing: -0.03em !important;
+        margin-bottom: 0.5rem !important;
+        color: #ffffff !important;
     }
-    div[data-testid="stMetricValue"] {
-        font-size: 28px;
-        color: #00d2ff;
-        font-weight: bold;
+    
+    h2 {
+        font-size: 1.4rem !important;
+        font-family: 'Sora', sans-serif !important;
+        font-weight: 600 !important;
+        letter-spacing: -0.02em !important;
+        margin-top: 1.2rem !important;
+        margin-bottom: 0.6rem !important;
+        color: #ffffff !important;
     }
-    div[data-testid="stSidebar"] {
-        background-color: #1e222b;
+    
+    h3 {
+        font-size: 1.12rem !important;
+        font-family: 'Sora', sans-serif !important;
+        font-weight: 600 !important;
+        letter-spacing: -0.01em !important;
+        margin-top: 0.8rem !important;
+        margin-bottom: 0.4rem !important;
+        color: #ffffff !important;
     }
-    </style>
+    
+    p, li, label, span, div {
+        font-family: 'DM Sans', sans-serif !important;
+    }
+    
+    .stMarkdown p {
+        font-size: 0.95rem !important;
+        line-height: 1.6 !important;
+        color: #cccccc !important;
+    }
+    
+    .gradient-text {
+        background: linear-gradient(135deg, #00d4ff 0%, #a855f7 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: 700;
+    }
+    
+    [data-testid="stSidebar"] {
+        background-color: rgba(8, 8, 8, 0.95) !important;
+        backdrop-filter: blur(15px) !important;
+        border-right: 1px solid rgba(0, 212, 255, 0.1) !important;
+    }
+    
+    .metric-card {
+        background: rgba(10, 10, 10, 0.8) !important;
+        backdrop-filter: blur(25px) !important;
+        border: 1px solid rgba(0, 212, 255, 0.15) !important;
+        border-radius: 16px;
+        padding: 16px 12px;
+        margin-bottom: 15px;
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.4s;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        min-height: 120px;
+    }
+    
+    .metric-card:hover {
+        transform: translateY(-4px);
+        border-color: rgba(168, 85, 247, 0.5) !important;
+        box-shadow: 0 12px 30px rgba(168, 85, 247, 0.25);
+    }
+    
+    .metric-title {
+        font-size: 0.78rem;
+        color: #aaaaaa;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-bottom: 6px;
+        font-family: 'Sora', sans-serif;
+        font-weight: 500;
+        line-height: 1.35;
+    }
+    
+    .metric-value {
+        font-size: 1.7rem;
+        font-weight: 700;
+        color: #ffffff;
+        font-family: 'Sora', sans-serif;
+        line-height: 1.2;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    }
+    
+    .metric-value.savings {
+        color: #00d4ff;
+        text-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
+    }
+    
+    .metric-value.runtime {
+        color: #a855f7;
+        text-shadow: 0 0 15px rgba(168, 85, 247, 0.3);
+    }
+    
+    .stButton>button {
+        background: linear-gradient(135deg, #00d4ff 0%, #a855f7 100%) !important;
+        color: #050505 !important;
+        border-radius: 12px !important;
+        font-weight: 700 !important;
+        border: none !important;
+        padding: 12px 28px !important;
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        box-shadow: 0 4px 15px rgba(0, 212, 255, 0.2) !important;
+    }
+    
+    .stButton>button:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 8px 25px rgba(168, 85, 247, 0.4) !important;
+        color: #050505 !important;
+    }
+    
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 24px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    
+    .stTabs [data-baseweb="tab"] {
+        height: 50px;
+        white-space: pre-wrap;
+        background-color: transparent;
+        border-radius: 4px;
+        color: #888888;
+        font-size: 1.05rem;
+        font-weight: 600;
+        transition: color 0.3s ease;
+    }
+    
+    .stTabs [data-baseweb="tab"]:hover {
+        color: #ffffff;
+    }
+    
+    .stTabs [aria-selected="true"] {
+        color: #00d4ff !important;
+        border-bottom-color: #00d4ff !important;
+    }
+    
+    /* Streamlit slider customization */
+    .stSlider [data-baseweb="slider"] [role="slider"] {
+        background-color: #00d4ff !important;
+        border: 2px solid #a855f7 !important;
+        width: 18px !important;
+        height: 18px !important;
+    }
+    .stSlider [data-baseweb="slider"] > div > div > div {
+        background: linear-gradient(90deg, #00d4ff, #a855f7) !important;
+    }
+    
+    /* Inputs, selectors, and dropdowns */
+    div[data-baseweb="input"] {
+        background-color: rgba(10, 10, 10, 0.8) !important;
+        border: 1px solid rgba(0, 212, 255, 0.15) !important;
+        border-radius: 10px !important;
+    }
+    div[data-baseweb="input"]:focus-within {
+        border-color: #a855f7 !important;
+    }
+    div[data-baseweb="select"] {
+        background-color: rgba(10, 10, 10, 0.8) !important;
+        border: 1px solid rgba(0, 212, 255, 0.15) !important;
+        border-radius: 10px !important;
+    }
+</style>
 """, unsafe_allow_html=True)
 
 # Cache data loader
@@ -59,12 +231,18 @@ except Exception as e:
     st.error(f"Error loading final_dataset.csv: {e}")
     st.stop()
 
-# Title
-st.title("🌐 Global Distribution Optimization Center")
-st.markdown("##### Production-grade multi-scenario facility location & logistics network planner.")
+# Title banner
+st.markdown('<h1 class="gradient-text" style="margin-bottom: 0.2rem;">🌐 Global Distribution Optimization Center</h1>', unsafe_allow_html=True)
+st.markdown('<p style="font-size: 1.02rem; color: #aaaaaa; font-family: \'Sora\', sans-serif; margin-bottom: 1.5rem;">Production-grade multi-scenario facility location & logistics network planner</p>', unsafe_allow_html=True)
 
 # Sidebar Settings
-st.sidebar.header("🌐 Model Configurations")
+st.sidebar.markdown("""
+<div style="text-align: center; margin-bottom: 20px; padding-top: 10px;">
+    <img src="https://img.icons8.com/nolan/256/globe.png" width="90" style="filter: drop-shadow(0 4px 10px rgba(0, 212, 255, 0.3)); margin-bottom: 10px;">
+    <h3 style="font-family: 'Sora', sans-serif; margin-top: 10px; color: #ffffff; font-size: 1.30rem;">GDOC Controller</h3>
+    <p style="font-size: 0.82rem; color: #888888; font-family: 'DM Sans', sans-serif; line-height: 1.4; padding: 0 10px;">Configure model hyperparameters and constraints dynamically.</p>
+</div>
+""", unsafe_allow_html=True)
 
 algorithm_name = st.sidebar.selectbox(
     "Optimization Model",
@@ -169,20 +347,40 @@ df_1000 = loader.get_top_cities(n=1000)
 df_1000["assigned_dc"] = assignments
 
 # Metrics Header
-st.subheader("📊 Network Performance Metrics")
+st.markdown('<div class="column-header">📊 Network Performance Metrics</div>', unsafe_allow_html=True)
 col1, col2, col3, col4 = st.columns(4)
 
 with col1:
-    st.metric("Total Weighted Distance", f"{total_dist:,.2f} km")
+    st.markdown(f"""
+    <div class="metric-card">
+        <div class="metric-title">Total Weighted Distance</div>
+        <div class="metric-value">{total_dist:,.2f} km</div>
+    </div>
+    """, unsafe_allow_html=True)
 with col2:
     # Compute average distance
     avg_d = total_dist / df_1000[weight_type].sum()
-    st.metric("Average Service Distance", f"{avg_d:,.2f} km/unit")
+    st.markdown(f"""
+    <div class="metric-card">
+        <div class="metric-title">Average Service Distance</div>
+        <div class="metric-value savings">{avg_d:,.2f} km/unit</div>
+    </div>
+    """, unsafe_allow_html=True)
 with col3:
     avg_lpi = np.mean([dc["lpi"] for dc in dc_locs])
-    st.metric("Avg DC Infrastructure (LPI)", f"{avg_lpi:.2f} / 5.0")
+    st.markdown(f"""
+    <div class="metric-card">
+        <div class="metric-title">Avg DC Infrastructure (LPI)</div>
+        <div class="metric-value">{avg_lpi:.2f} / 5.0</div>
+    </div>
+    """, unsafe_allow_html=True)
 with col4:
-    st.metric("Computation Runtime", f"{fit_time:.4f} seconds")
+    st.markdown(f"""
+    <div class="metric-card">
+        <div class="metric-title">Computation Runtime</div>
+        <div class="metric-value runtime">{fit_time:.4f} s</div>
+    </div>
+    """, unsafe_allow_html=True)
 
 # Tabs
 tab_map, tab_comparison, tab_dc_details = st.tabs(["🌐 Dynamic 3D Globe", "📈 Sensitivity & Comparisons", "🏢 DC Locations Details"])
@@ -307,7 +505,10 @@ with tab_map:
             aspectratio=dict(x=1, y=1, z=1)
         ),
         legend=dict(yanchor="top", y=0.9, xanchor="left", x=0.05),
-        height=700
+        height=700,
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="#0a0a0a",
+        font={"color": "white", "family": "DM Sans, sans-serif"}
     )
     
     st.plotly_chart(fig, use_container_width=True)
@@ -339,7 +540,22 @@ with tab_comparison:
             title="Elbow Curve: Weighted Geodesic Distance vs. K",
             xaxis_title="Number of Clusters (K)",
             yaxis_title="Total Weighted Geodesic Distance (km)",
-            height=350
+            height=350,
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="#0a0a0a",
+            font={"color": "white", "family": "DM Sans, sans-serif"}
+        )
+        fig_elbow.update_xaxes(
+            gridcolor="rgba(255, 255, 255, 0.05)",
+            zerolinecolor="rgba(255, 255, 255, 0.1)",
+            tickfont={"size": 10},
+            title_font={"size": 11, "family": "Sora, sans-serif"}
+        )
+        fig_elbow.update_yaxes(
+            gridcolor="rgba(255, 255, 255, 0.05)",
+            zerolinecolor="rgba(255, 255, 255, 0.1)",
+            tickfont={"size": 10},
+            title_font={"size": 11, "family": "Sora, sans-serif"}
         )
         st.plotly_chart(fig_elbow, use_container_width=True)
         
