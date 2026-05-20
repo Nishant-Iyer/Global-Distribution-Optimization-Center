@@ -39,42 +39,42 @@ st.markdown("""
     
     /* Typography Hierarchy */
     h1 {
-        font-size: 2.2rem !important;
+        font-size: 2.0rem !important;
         font-family: 'Sora', sans-serif !important;
         font-weight: 700 !important;
         letter-spacing: -0.03em !important;
-        margin-bottom: 0.5rem !important;
-        color: #ffffff !important;
-    }
-    
-    h2 {
-        font-size: 1.4rem !important;
-        font-family: 'Sora', sans-serif !important;
-        font-weight: 600 !important;
-        letter-spacing: -0.02em !important;
-        margin-top: 1.2rem !important;
-        margin-bottom: 0.6rem !important;
-        color: #ffffff !important;
-    }
-    
-    h3 {
-        font-size: 1.12rem !important;
-        font-family: 'Sora', sans-serif !important;
-        font-weight: 600 !important;
-        letter-spacing: -0.01em !important;
-        margin-top: 0.8rem !important;
         margin-bottom: 0.4rem !important;
         color: #ffffff !important;
     }
     
-    p, li, label, span, div {
+    h2 {
+        font-size: 1.35rem !important;
+        font-family: 'Sora', sans-serif !important;
+        font-weight: 600 !important;
+        letter-spacing: -0.02em !important;
+        margin-top: 1.0rem !important;
+        margin-bottom: 0.5rem !important;
+        color: #ffffff !important;
+    }
+    
+    h3 {
+        font-size: 1.15rem !important;
+        font-family: 'Sora', sans-serif !important;
+        font-weight: 600 !important;
+        letter-spacing: -0.01em !important;
+        margin-top: 0.8rem !important;
+        margin-bottom: 0.3rem !important;
+        color: #ffffff !important;
+    }
+    
+    p, li, label, span {
         font-family: 'DM Sans', sans-serif !important;
     }
     
     .stMarkdown p {
-        font-size: 0.95rem !important;
-        line-height: 1.6 !important;
-        color: #cccccc !important;
+        font-size: 0.92rem !important;
+        line-height: 1.5 !important;
+        color: #dddddd !important;
     }
     
     .gradient-text {
@@ -94,38 +94,36 @@ st.markdown("""
         background: rgba(10, 10, 10, 0.8) !important;
         backdrop-filter: blur(25px) !important;
         border: 1px solid rgba(0, 212, 255, 0.15) !important;
-        border-radius: 16px;
-        padding: 16px 12px;
-        margin-bottom: 15px;
+        border-radius: 12px;
+        padding: 14px 10px;
+        margin-bottom: 12px;
         box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-        transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.4s;
+        transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s;
         text-align: center;
         display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        min-height: 120px;
+        min-height: 90px;
     }
     
     .metric-card:hover {
-        transform: translateY(-4px);
+        transform: translateY(-3px);
         border-color: rgba(168, 85, 247, 0.5) !important;
         box-shadow: 0 12px 30px rgba(168, 85, 247, 0.25);
     }
     
     .metric-title {
-        font-size: 0.78rem;
-        color: #aaaaaa;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        margin-bottom: 6px;
+        font-size: 0.82rem;
+        color: #b0b0b0;
+        margin-bottom: 4px;
         font-family: 'Sora', sans-serif;
         font-weight: 500;
-        line-height: 1.35;
+        line-height: 1.2;
     }
     
     .metric-value {
-        font-size: 1.7rem;
+        font-size: 1.35rem;
         font-weight: 700;
         color: #ffffff;
         font-family: 'Sora', sans-serif;
@@ -347,7 +345,7 @@ df_1000 = loader.get_top_cities(n=1000)
 df_1000["assigned_dc"] = assignments
 
 # Metrics Header
-st.markdown('<div class="column-header">📊 Network Performance Metrics</div>', unsafe_allow_html=True)
+st.markdown("### 📊 Network Performance Metrics")
 col1, col2, col3, col4 = st.columns(4)
 
 with col1:
