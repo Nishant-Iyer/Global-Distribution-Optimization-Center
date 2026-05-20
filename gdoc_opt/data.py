@@ -92,11 +92,9 @@ class DataLoader:
         # Drop rows with missing lat, lon, or population
         clean_df = df.dropna(subset=["population", "latitude", "longitude"]).copy()
         
-        # Clean population column (handles string with commas or already numeric)
-        if clean_df["population"].dtype == object:
-            clean_df["population"] = pd.to_numeric(
-                clean_df["population"].astype(str).str.replace(",", ""), errors="coerce"
-            )
+        # Unconditionally clean and convert population to numeric (handles spaces, commas, category/string dtypes)
+        pop_str = clean_df["population"].astype(str).str.strip().str.replace(",", "")
+        clean_df["population"] = pd.to_numeric(pop_str, errors="coerce")
         
         clean_df = clean_df.dropna(subset=["population"])
         clean_df["population"] = clean_df["population"].astype(float)
