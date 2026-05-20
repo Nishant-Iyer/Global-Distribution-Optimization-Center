@@ -1,99 +1,105 @@
-# Global Distribution Center Optimization
+# Global Distribution Optimization Center (GDOC)
 
-## Project Overview
-This project optimizes the placement of distribution centers (DCs) worldwide to minimize the total population-weighted distance, using 2023 population data for the top 1000 cities. The analysis addresses two objectives:
+🌐 **Enterprise-Grade Global Supply Chain Facility Location & Spatial Optimization Platform.**
 
-1. **Single DC Optimization**: Identify the city closest to the global population.
-2. **Multiple DC Optimization**: Determine the optimal number and locations of DCs using K-means clustering.
-
-The results provide insights for strategically placing DCs to improve global distribution efficiency.
+This system transitions a simple clustering notebook into an absolute overkill supply chain planning system. It equips analysts and planners with mathematical solvers, REST API endpoints, and a rich, interactive 3D Globe dashboard to perform multi-scenario distribution network optimization.
 
 ---
 
-## Table of Contents
-- [Data Source](#data-source)
-- [Methodology](#methodology)
-  - [Single DC Analysis](#single-dc-analysis)
-  - [Multiple DC Analysis](#multiple-dc-analysis)
-- [Results](#results)
-  - [Single DC Result](#single-dc-result)
-  - [Multiple DC Results (K=5)](#multiple-dc-results-k5)
-- [Assumptions](#assumptions)
-- [Sensitivity Analysis](#sensitivity-analysis)
-- [Installation and Usage](#installation-and-usage)
-- [Future Work](#future-work)
-- [License](#license)
+## 🚀 Key Features
+
+### 1. Advanced Math & Optimization Solvers
+- **K-Means (Euclidean 3D)**: Fast baseline clustering operating on Cartesian coordinates projected back to the WGS-84 sphere.
+- **K-Medoids (Exact Geodesic)**: Vectorized PAM (Partitioning Around Medoids) algorithm operating on pre-computed geodesic distance matrices.
+- **PyTorch Spherical Gradient Descent**: Adam optimizer performing gradient descent on the unit sphere $S^2$, projecting centers via $C \leftarrow \frac{C}{\|C\|_2}$ at each epoch.
+- **MILP Facility Location**: Solves the Uncapacitated and Capacitated Facility Location Problem (UFLP/CFLP) using the `CBC` solver via `PuLP`. Includes candidate site selection bounds to scale safely.
+
+### 2. Multi-Scenario & Variable Constraints
+- **Dynamic Demand Weighting**: Choose between **Raw Population** demand and **Purchasing Power Adjusted** ($Population \times GDP_{per capita}$) demand weighting.
+- **Infrastructure Readiness (LPI Index)**: Penalize placing distribution centers in countries with low logistics capabilities using a customizable weight multiplier $\beta$ on the distance function:
+  $$D'_{ij} = D_{ij} \times \left(1 + \beta \times \left(5.0 - \text{LPI}_j\right)\right)$$
+- **Scenario Planning (Forced DCs)**: Force placement in key supply chain hubs (e.g., Singapore, Rotterdam) and solve for the remaining slots.
+
+### 3. Application Stack
+- **FastAPI Backend Service**: Exposes high-throughput JSON optimization and benchmark endpoints.
+- **Streamlit Interactive 3D Globe**: Render networks in the browser, showing geodesic routing arcs, customer demand sizes, and DC profiles.
 
 ---
 
-## Data Source
-- **Dataset**: [Simple Maps World Cities Database (2023)](https://simplemaps.com/data/world-cities)
-  - Includes city names, countries, populations, latitudes, and longitudes for the top 1000 cities by population.
-  - Meets project requirements for current (2023) and sufficient (1000 cities) data.
+## 🛠️ Installation & Setup
 
----
-
-## Methodology
-
-### Single DC Analysis
-- **Objective**: Minimize the total population-weighted distance from a single DC to all cities.
-- **Approach**:
-  - Calculate great-circle distances using the **Haversine formula**.
-  - For each city \(i\), compute:
-    \[
-    \text{Total Weighted Distance}_i = \sum_{j=1}^{N} (\text{Population}_j \times \text{Distance}_{i,j})
-    \]
-  - Select the city with the smallest total weighted distance.
-
-### Multiple DC Analysis
-- **Objective**: Identify the optimal number and locations of multiple DCs.
-- **Approach**:
-  - Convert coordinates to **3D Cartesian coordinates** for clustering.
-  - Apply **K-means clustering** (K=1 to 10), weighted by population.
-  - Assign the nearest city to each cluster centroid as the DC.
-  - Use the **elbow method** to find the optimal K.
-
----
-
-## Results
-
-### Single DC Result
-- **Optimal Location**: **Narayanganj, Bangladesh**
-- **Reason**: Proximity to dense population centers in South Asia.
-
-### Multiple DC Results (K=5)
-- **Optimal Number of DCs**: 5
-- **DC Locations**:
-  - Yichun, China
-  - Esfahan, Iran
-  - Campo Grande, Brazil
-  - New Orleans, United States
-  - Yaounde, Cameroon
-- **Total Weighted Distance**: 4,822,347,640,365.60 km
-
----
-
-## Assumptions
-- **Distance Metric**: Haversine formula for geodesic distances.
-- **Earth Model**: Perfect sphere (radius 6371 km).
-- **Population Data**: Static and concentrated at city coordinates.
-- **DC Placement**: Located at city centers with no capacity limits.
-- **Objective**: Minimize total weighted distance (no cost or logistics constraints).
-
----
-
-## Sensitivity Analysis
-- **Varying K**:
-  - K=3: Higher distance, inadequate coverage.
-  - K=5: Optimal balance.
-  - K=7: Marginal improvement, added complexity.
-- **Number of Cities**: Minor impact on DC locations.
-- **Population Noise**: Negligible effect on primary DC selections.
-
----
-
-## Installation and Usage
-1. **Clone the Repository**:
+### Local Setup
+1. **Create and Activate Virtual Environment**:
    ```bash
-   git clone https://github.com/nishant-iyer/global-distribution-optimization-center.git
-   cd global-dc-optimization
+   python3 -m venv .venv
+   source .venv/bin/activate
+   ```
+
+2. **Install Package (Editable Mode)**:
+   ```bash
+   pip install -r requirements.txt
+   pip install -e .
+   ```
+
+3. **Run Unit Tests**:
+   ```bash
+   python -m unittest tests/test_optimizers.py
+   ```
+
+---
+
+## 🐳 Running with Containerization
+
+### Docker Compose
+Run both the API and Streamlit Dashboard concurrently:
+```bash
+docker-compose up --build
+```
+- **FastAPI API**: http://localhost:8000
+- **FastAPI Swagger Docs**: http://localhost:8000/docs
+- **Streamlit Dashboard**: http://localhost:8501
+
+### Kubernetes Manifests
+Deploy the platform onto a cluster (with services and replica controls):
+```bash
+kubectl apply -f k8s/deployment.yml
+```
+
+---
+
+## 📈 API Endpoints
+
+### 1. Run Optimization: `POST /optimize`
+**Payload**:
+```json
+{
+  "algorithm": "milp",
+  "n_clusters": 5,
+  "metric": "geodesic",
+  "weight_column": "gdp_adjusted",
+  "lpi_factor": 0.5,
+  "candidate_limit": 50
+}
+```
+
+### 2. Run Comparative Models: `GET /compare`
+Allows comparing runtime, total distance, and selected sites across all solvers in one call.
+
+---
+
+## 📊 Dashboard Usage
+
+### Running Locally
+Run the dashboard locally using Streamlit:
+```bash
+streamlit run app.py
+```
+Use the sidebar to change algorithms, toggle demand weighting modes, scale infrastructure readiness parameters, and add scenario constraints.
+
+### Deploying to Streamlit Community Cloud (GitHub Hosting)
+You can deploy this dashboard directly from GitHub for free using Streamlit Community Cloud:
+1. **Push this repository** to your GitHub account.
+2. Visit [Streamlit Share](https://share.streamlit.io/) and log in with your GitHub account.
+3. Click **New app**, then select your repository, branch, and set the Main file path to `app.py`.
+4. Click **Deploy!** Your interactive dashboard will be live and shared publicly.
+
