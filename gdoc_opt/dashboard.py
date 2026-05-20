@@ -12,6 +12,49 @@ from gdoc_opt.models.kmedoids import KMedoidsOptimizer
 from gdoc_opt.models.milp import MILPOptimizer
 from gdoc_opt.models.pytorch_opt import PyTorchOptimizer
 
+# Cached loader for country outlines in 3D Cartesian coordinates
+@st.cache_data
+def load_country_borders(radius=0.995):
+    import json
+    import os
+    
+    path = os.path.join(os.path.dirname(__file__), "countries.geojson")
+    if not os.path.exists(path):
+        return [], [], []
+        
+    with open(path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+        
+    xs, ys, zs = [], [], []
+    for feature in data['features']:
+        geom = feature['geometry']
+        g_type = geom['type']
+        coords = geom['coordinates']
+        
+        polygons = []
+        if g_type == 'Polygon':
+            polygons = [coords]
+        elif g_type == 'MultiPolygon':
+            polygons = coords
+            
+        for poly in polygons:
+            for ring in poly:
+                lons = [pt[0] for pt in ring]
+                lats = [pt[1] for pt in ring]
+                
+                lons_rad = np.radians(lons)
+                lats_rad = np.radians(lats)
+                
+                x = radius * np.cos(lats_rad) * np.cos(lons_rad)
+                y = radius * np.cos(lats_rad) * np.sin(lons_rad)
+                z = radius * np.sin(lats_rad)
+                
+                xs.extend(x.tolist() + [None])
+                ys.extend(y.tolist() + [None])
+                zs.extend(z.tolist() + [None])
+                
+    return xs, ys, zs
+
 # Page Config
 st.set_page_config(
     page_title="Global Distribution Optimization Center",
@@ -435,6 +478,18 @@ with tab_map:
         hoverinfo="skip"
     ))
     
+    # 1.5. Draw country outlines
+    bx, by, bz = load_country_borders(radius=0.995)
+    if bx:
+        fig.add_trace(go.Scatter3d(
+            x=bx, y=by, z=bz,
+            mode="lines",
+            name="Country Outlines",
+            line=dict(color="rgba(255, 255, 255, 0.2)", width=1.0),
+            hoverinfo="skip",
+            showlegend=False
+        ))
+    
     # 2. Add customer cities, sized by population and colored by cluster assignment
     colors = [
         "#FF5733", "#33FF57", "#3357FF", "#F3FF33", "#FF33F3", 
@@ -599,9 +654,10 @@ with tab_comparison:
                     lpi_factor=lpi_factor
                 )
                 t_run = time.time() - t0
+                formatted_dist = format_metric_value(res['total_distance'], is_weighted=True, w_type=weight_type)
                 benchmark_list.append({
                     "Algorithm": name,
-                    "Total Distance (km)": f"{res['total_distance']:,.2f}",
+                    "Total Weighted Distance": formatted_dist,
                     "Avg DC LPI Score": f"{np.mean([dc['lpi'] for dc in res['dc_locations']]):.2f}",
                     "Fit Time (seconds)": f"{t_run:.4f}",
                     "Optimal DCs": ", ".join([loc["city"] for loc in res["dc_locations"]])
