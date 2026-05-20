@@ -12,48 +12,19 @@ from gdoc_opt.models.kmedoids import KMedoidsOptimizer
 from gdoc_opt.models.milp import MILPOptimizer
 from gdoc_opt.models.pytorch_opt import PyTorchOptimizer
 
-# Cached loader for country outlines in 3D Cartesian coordinates
+# Cached loader for pre-processed country outlines in 3D Cartesian coordinates
 @st.cache_data
-def load_country_borders(radius=0.995):
+def load_country_borders():
     import json
     import os
     
-    path = os.path.join(os.path.dirname(__file__), "countries.geojson")
+    path = os.path.join(os.path.dirname(__file__), "borders_3d.json")
     if not os.path.exists(path):
         return [], [], []
         
     with open(path, "r", encoding="utf-8") as f:
         data = json.load(f)
-        
-    xs, ys, zs = [], [], []
-    for feature in data['features']:
-        geom = feature['geometry']
-        g_type = geom['type']
-        coords = geom['coordinates']
-        
-        polygons = []
-        if g_type == 'Polygon':
-            polygons = [coords]
-        elif g_type == 'MultiPolygon':
-            polygons = coords
-            
-        for poly in polygons:
-            for ring in poly:
-                lons = [pt[0] for pt in ring]
-                lats = [pt[1] for pt in ring]
-                
-                lons_rad = np.radians(lons)
-                lats_rad = np.radians(lats)
-                
-                x = radius * np.cos(lats_rad) * np.cos(lons_rad)
-                y = radius * np.cos(lats_rad) * np.sin(lons_rad)
-                z = radius * np.sin(lats_rad)
-                
-                xs.extend(x.tolist() + [None])
-                ys.extend(y.tolist() + [None])
-                zs.extend(z.tolist() + [None])
-                
-    return xs, ys, zs
+    return data.get("x", []), data.get("y", []), data.get("z", [])
 
 # Page Config
 st.set_page_config(
@@ -479,7 +450,7 @@ with tab_map:
     ))
     
     # 1.5. Draw country outlines
-    bx, by, bz = load_country_borders(radius=0.995)
+    bx, by, bz = load_country_borders()
     if bx:
         fig.add_trace(go.Scatter3d(
             x=bx, y=by, z=bz,
