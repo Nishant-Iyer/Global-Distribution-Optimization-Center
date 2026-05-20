@@ -344,24 +344,45 @@ fit_time = results["metrics"]["fit_time_seconds"]
 df_1000 = loader.get_top_cities(n=1000)
 df_1000["assigned_dc"] = assignments
 
+# Helper to format massive numbers cleanly
+def format_metric_value(val: float, is_weighted: bool = False, w_type: str = "population") -> str:
+    if not is_weighted:
+        return f"{val:,.1f} km"
+    
+    suffix = "km-pop" if w_type == "population" else "km-GDP"
+    if val >= 1e18:
+        return f"{val/1e18:.2f} E {suffix}"
+    elif val >= 1e15:
+        return f"{val/1e15:.2f} Q {suffix}"
+    elif val >= 1e12:
+        return f"{val/1e12:.2f} T {suffix}"
+    elif val >= 1e9:
+        return f"{val/1e9:.2f} B {suffix}"
+    elif val >= 1e6:
+        return f"{val/1e6:.2f} M {suffix}"
+    else:
+        return f"{val:,.1f} {suffix}"
+
 # Metrics Header
 st.markdown("### 📊 Network Performance Metrics")
 col1, col2, col3, col4 = st.columns(4)
 
 with col1:
+    formatted_total_dist = format_metric_value(total_dist, is_weighted=True, w_type=weight_type)
     st.markdown(f"""
     <div class="metric-card">
         <div class="metric-title">Total Weighted Distance</div>
-        <div class="metric-value">{total_dist:,.2f} km</div>
+        <div class="metric-value">{formatted_total_dist}</div>
     </div>
     """, unsafe_allow_html=True)
 with col2:
     # Compute average distance
     avg_d = total_dist / df_1000[weight_type].sum()
+    formatted_avg_d = format_metric_value(avg_d, is_weighted=False)
     st.markdown(f"""
     <div class="metric-card">
         <div class="metric-title">Average Service Distance</div>
-        <div class="metric-value savings">{avg_d:,.2f} km/unit</div>
+        <div class="metric-value savings">{formatted_avg_d}</div>
     </div>
     """, unsafe_allow_html=True)
 with col3:
