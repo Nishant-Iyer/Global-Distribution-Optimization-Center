@@ -18,6 +18,9 @@ class KMedoidsOptimizer(BaseOptimizer):
                 weight_column (str): Column to use for demand weights. Default is 'population'.
                 max_iter (int): Maximum improvement passes. Default is 200.
                 random_state (int): Seed for the k-means++ style start. Default is 0.
+                distance_matrix (np.ndarray): Precomputed n x n distances; skips computing them.
+                site_costs (np.ndarray): Fixed cost of opening a center at each city, in the same
+                    units as weight x distance. Default is zero.
         """
         start_time = time.time()
         metric = kwargs.get("metric", "haversine")
@@ -34,7 +37,11 @@ class KMedoidsOptimizer(BaseOptimizer):
         lpi_values = df["lpi"].values.astype(float)
         
         # 1. Compute geodesic distance matrix
-        D = compute_distance_matrix(df, metric=metric)
+        D = kwargs.get("distance_matrix")
+        if D is None:
+            D = compute_distance_matrix(df, metric=metric)
+        site_costs = kwargs.get("site_costs")
+        site_costs = np.zeros(n) if site_costs is None else np.asarray(site_costs, dtype=float)
         
         # Compute LPI penalized distance matrix for medoid selection
         # D_penalized[i, j] = D[i, j] * (1.0 + lpi_factor * (5.0 - lpi_j))
@@ -42,7 +49,7 @@ class KMedoidsOptimizer(BaseOptimizer):
         
         # 2. Initialize Medoids (geodesic K-Means++) using penalized distance
         # First medoid is the 1-medoid (minimizer of single DC cost)
-        total_costs = np.sum(D_penalized * weights[:, np.newaxis], axis=0)
+        total_costs = np.sum(D_penalized * weights[:, np.newaxis], axis=0) + site_costs
         medoids = [int(np.argmin(total_costs))]
         
         # Add remaining medoids using distance-weighted probability
@@ -61,7 +68,7 @@ class KMedoidsOptimizer(BaseOptimizer):
         
         # 3. PAM swap refinement: each pass evaluates every (medoid, candidate) swap
         #    and applies the best one, until no swap lowers the cost (a true local optimum).
-        best_cost = self._calculate_cost(medoids, D_penalized, weights)
+        best_cost = self._calculate_cost(medoids, D_penalized, weights) + site_costs[medoids].sum()
         iterations = 0
         while iterations < max_iter:
             iterations += 1
@@ -71,6 +78,8 @@ class KMedoidsOptimizer(BaseOptimizer):
                 dist_others = np.min(D_penalized[:, others], axis=1) if len(others) else np.full(n, np.inf)
                 # cost of replacing medoid i with each candidate j, for all j at once
                 swap_costs = (np.minimum(dist_others[:, np.newaxis], D_penalized) * weights[:, np.newaxis]).sum(axis=0)
+                swap_costs = swap_costs + site_costs + site_costs[others].sum()
+                swap_costs[medoids] = np.inf
                 j = int(np.argmin(swap_costs))
                 if swap_costs[j] < best_swap_cost - 1e-9:
                     best_swap, best_swap_cost = (i, j), swap_costs[j]
@@ -103,6 +112,7 @@ class KMedoidsOptimizer(BaseOptimizer):
         
         return {
             "dc_locations": dc_locations,
+            "medoid_indices": [int(m) for m in medoids],
             "assignments": closest_medoid_indices.tolist(),
             "total_distance": float(actual_total_distance),
             "metrics": {

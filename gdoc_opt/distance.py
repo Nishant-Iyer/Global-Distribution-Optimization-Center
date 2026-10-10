@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-from geopy.distance import geodesic
 from typing import Union
 
 EARTH_RADIUS_KM = 6371.0
@@ -27,16 +26,32 @@ def geodesic_exact(lon1: float, lat1: float, lon2: float, lat2: float) -> float:
     Computes exact geodesic distance on the WGS-84 ellipsoid using geopy.
     Returned value is in kilometers.
     """
+    from geopy.distance import geodesic
     return geodesic((lat1, lon1), (lat2, lon2)).km
+
+_TRANSPORT_CACHE = {}
+
+
+def transport_model(df: pd.DataFrame):
+    """Road-and-sea model for these cities (built once per city list, about 30 s)."""
+    from gdoc_opt.transport import TransportModel
+    key = tuple(zip(df["city"].values, df["country"].values))
+    if key not in _TRANSPORT_CACHE:
+        _TRANSPORT_CACHE[key] = TransportModel(df)
+    return _TRANSPORT_CACHE[key]
+
 
 def compute_distance_matrix(
     df: pd.DataFrame, metric: str = "haversine"
 ) -> np.ndarray:
     """
     Computes a symmetric distance matrix for all cities in the dataframe.
-    metric can be 'haversine' or 'geodesic'.
+    metric can be 'haversine' (straight line over the globe), 'geodesic' (WGS-84 ellipsoid)
+    or 'transport' (estimated road and sea freight distance, see gdoc_opt/transport.py).
     """
     n = len(df)
+    if metric == "transport":
+        return transport_model(df).matrix()
     coords = df[["longitude", "latitude"]].values
     
     if metric == "haversine":

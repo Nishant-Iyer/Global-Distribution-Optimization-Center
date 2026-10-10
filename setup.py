@@ -6,10 +6,13 @@ setup(
     description="Global Distribution Center Optimization System",
     author="Nishant Iyer",
     packages=find_packages(),
+    package_data={"gdoc_opt": ["*.csv", "*.geojson", "*.json"]},
+    include_package_data=True,
     install_requires=[
         "pandas>=1.5.0",
         "numpy>=1.21.0",
         "scipy>=1.9.0",
+        "matplotlib>=3.5.0",
         "scikit-learn>=1.0.0",
         "geopy>=2.3.0",
         "pulp>=2.7.0",

@@ -6,7 +6,7 @@ import numpy as np
 from gdoc_opt.data import DataLoader
 from gdoc_opt.models.kmeans import KMeansOptimizer
 from gdoc_opt.models.kmedoids import KMedoidsOptimizer
-from gdoc_opt.models.milp import MILPOptimizer
+from gdoc_opt.models.milp import MILPOptimizer  # noqa: E402
 from gdoc_opt.models.pytorch_opt import PyTorchOptimizer
 
 class TestGDOCPipeline(unittest.TestCase):
@@ -90,3 +90,40 @@ class TestGDOCPipeline(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestTransportAndSeededMILP(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "final_dataset.csv")
+        cls.df = DataLoader(path).get_top_cities(n=12).reset_index(drop=True)
+
+    def test_country_indicators_cover_top_cities(self):
+        from gdoc_opt.data import load_country_indicators
+        ind = load_country_indicators()
+        for country in self.df["country"].unique():
+            self.assertIn(country, ind.index)
+        self.assertTrue((self.df["lpi"].between(1, 5)).all())
+        self.assertTrue((self.df["price_level"] > 0).all())
+
+    def test_freight_distance_is_at_least_straight_line(self):
+        from gdoc_opt.distance import compute_distance_matrix
+        gc = compute_distance_matrix(self.df, "haversine")
+        fr = compute_distance_matrix(self.df, "transport")
+        self.assertTrue(np.all(fr + 1e-6 >= gc))
+        self.assertTrue(np.allclose(fr, fr.T))
+
+    def test_seeded_milp_matches_brute_force(self):
+        import itertools
+        from gdoc_opt.distance import compute_distance_matrix
+        from gdoc_opt.models.seeded_milp import SeededMILPOptimizer
+        D = compute_distance_matrix(self.df, "haversine")
+        w = self.df["population"].values.astype(float)
+        best = min(np.sum(np.min(D[:, list(c)], axis=1) * w) for c in itertools.combinations(range(len(w)), 2))
+        res = SeededMILPOptimizer().fit(self.df, 2, distance_matrix=D)
+        self.assertAlmostEqual(res["total_distance"], best, delta=best * 1e-6)
+
+    def test_capacity_is_respected(self):
+        from gdoc_opt.models.seeded_milp import SeededMILPOptimizer
+        res = SeededMILPOptimizer().fit(self.df, 3, metric="haversine", capacity_share=0.4)
+        self.assertTrue(all(d["share_of_demand"] <= 0.4 + 1e-6 for d in res["dc_locations"]))

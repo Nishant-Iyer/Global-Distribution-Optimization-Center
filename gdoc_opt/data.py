@@ -1,86 +1,18 @@
-import pandas as pd
+import os
+
 import numpy as np
-from typing import Tuple, Dict
+import pandas as pd
 
-# Country GDP per Capita (nominal USD, rough 2023 estimates)
-GDP_PER_CAPITA: Dict[str, float] = {
-    "United States": 80000.0,
-    "Germany": 52000.0,
-    "Japan": 34000.0,
-    "United Kingdom": 46000.0,
-    "France": 44000.0,
-    "China": 12500.0,
-    "India": 2500.0,
-    "Brazil": 10000.0,
-    "Russia": 12000.0,
-    "Bangladesh": 2700.0,
-    "Iran": 4000.0,
-    "Nigeria": 2000.0,
-    "Cameroon": 1600.0,
-    "South Africa": 6000.0,
-    "Egypt": 4000.0,
-    "Indonesia": 5000.0,
-    "Mexico": 11000.0,
-    "Canada": 53000.0,
-    "Australia": 64000.0,
-    "Singapore": 82000.0,
-    "Finland": 54000.0,
-    "Netherlands": 57000.0,
-    "Switzerland": 92000.0,
-    "Pakistan": 1500.0,
-    "Argentina": 13000.0,
-    "Turkey": 11000.0,
-    "Saudi Arabia": 30000.0,
-    "South Korea": 33000.0,
-    "Italy": 35000.0,
-    "Spain": 30000.0,
-    "Colombia": 6500.0,
-    "Kenya": 2000.0,
-    "Vietnam": 4300.0,
-    "Thailand": 7500.0,
-    "Philippines": 3600.0,
-    "Malaysia": 12000.0,
-}
+INDICATORS_PATH = os.path.join(os.path.dirname(__file__), "country_indicators.csv")
 
-# World Bank Logistics Performance Index (LPI) scores (1 to 5 scale, 2023)
-LPI_SCORES: Dict[str, float] = {
-    "Singapore": 4.3,
-    "Finland": 4.2,
-    "Germany": 4.1,
-    "Netherlands": 4.1,
-    "Switzerland": 4.1,
-    "Japan": 3.9,
-    "United States": 3.8,
-    "United Kingdom": 3.7,
-    "Canada": 3.7,
-    "Australia": 3.7,
-    "France": 3.7,
-    "South Korea": 3.8,
-    "China": 3.7,
-    "Italy": 3.6,
-    "Spain": 3.6,
-    "Saudi Arabia": 3.4,
-    "India": 3.4,
-    "Brazil": 3.2,
-    "South Africa": 3.1,
-    "Indonesia": 3.0,
-    "Mexico": 2.9,
-    "Turkey": 3.1,
-    "Vietnam": 3.3,
-    "Thailand": 3.5,
-    "Malaysia": 3.6,
-    "Philippines": 3.3,
-    "Egypt": 2.6,
-    "Russia": 2.6,
-    "Nigeria": 2.6,
-    "Bangladesh": 2.6,
-    "Cameroon": 2.5,
-    "Pakistan": 2.4,
-    "Iran": 2.4,
-    "Colombia": 2.9,
-    "Argentina": 2.8,
-    "Kenya": 2.7,
-}
+
+def load_country_indicators(path: str = INDICATORS_PATH) -> pd.DataFrame:
+    """World Bank GDP per capita, logistics (LPI) score and price level per country.
+
+    Built by scripts/fetch_country_data.py; see the *_source columns for imputed values.
+    """
+    return pd.read_csv(path).set_index("country")
+
 
 class DataLoader:
     def __init__(self, filepath: str):
@@ -108,10 +40,11 @@ class DataLoader:
         clean_df["Y"] = np.cos(clean_df["lat_rad"]) * np.sin(clean_df["lon_rad"])
         clean_df["Z"] = np.sin(clean_df["lat_rad"])
         
-        # Add GDP/Capita and LPI columns with fallbacks
-        clean_df["gdp_per_capita"] = clean_df["country"].map(GDP_PER_CAPITA).fillna(6000.0)
-        clean_df["lpi"] = clean_df["country"].map(LPI_SCORES).fillna(2.8)
-        
+        # Country indicators. The few small territories without an entry get the median country.
+        ind = load_country_indicators()
+        for col in ("gdp_per_capita", "lpi", "price_level"):
+            clean_df[col] = clean_df["country"].map(ind[col]).fillna(ind[col].median())
+
         # Add GDP adjusted population column (Purchasing Power adjusted demand)
         clean_df["gdp_adjusted"] = clean_df["population"] * clean_df["gdp_per_capita"]
         
