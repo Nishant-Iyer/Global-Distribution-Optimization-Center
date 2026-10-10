@@ -65,17 +65,18 @@ def main():
     iso = country_iso3()
     codes = sorted(set(iso.values()))
     meta = {}
-    for chunk in [codes[i:i + 60] for i in range(0, len(codes), 60)]:
-        res = get(f"{API}/country/{';'.join(chunk)}?format=json&per_page=500")
-        for c in res[1] or []:
-            meta[c["id"]] = {"income": c["incomeLevel"]["value"], "region": c["region"]["value"]}
+    res = get(f"{API}/country/all?format=json&per_page=1000")
+    for c in res[1]:
+        meta[c["id"]] = {"income": c["incomeLevel"]["value"], "region": c["region"]["value"]}
     values = {c: {} for c in codes}
     for col, ind in INDICATORS.items():
-        for chunk in [codes[i:i + 60] for i in range(0, len(codes), 60)]:
-            res = get(f"{API}/country/{';'.join(chunk)}/indicator/{ind}?format=json&mrnev=1&per_page=1000")
-            for row in res[1] or []:
-                if row["value"] is not None:
-                    values[row["countryiso3code"]][col] = (float(row["value"]), int(row["date"]), "World Bank")
+        res = get(f"{API}/country/all/indicator/{ind}?format=json&mrnev=1&per_page=20000")
+        if len(res) < 2:
+            raise SystemExit(f"World Bank API error for {ind}: {res}")
+        for row in res[1] or []:
+            code = row["countryiso3code"]
+            if code in values and row["value"] is not None:
+                values[code][col] = (float(row["value"]), int(row["date"]), "World Bank")
     for code, vals in MANUAL_VALUES.items():
         for col, v in vals.items():
             values[code].setdefault(col, v)
