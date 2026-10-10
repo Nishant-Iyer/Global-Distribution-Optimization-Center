@@ -39,12 +39,73 @@ def candidate_sites(D: np.ndarray, seeds: List[int], weights: np.ndarray, neighb
     return np.array(sorted(cand))
 
 
+def capacitated_assignment(Dp: np.ndarray, w: np.ndarray, sites, cap: float, f=None):
+    """Greedy capacity-aware assignment: cities that lose most by missing their nearest site
+    choose first, each taking the nearest site with room. Returns (cost, assignment)."""
+    sites = list(sites)
+    d = Dp[:, sites]
+    srt = np.sort(d, axis=1)
+    regret = (srt[:, 1] - srt[:, 0]) * w if len(sites) > 1 else w
+    order = np.argsort(-regret)
+    pref = np.argsort(d, axis=1)
+    load = np.zeros(len(sites))
+    asg = np.empty(len(w), dtype=int)
+    cost = 0.0
+    for i in order:
+        for q in pref[i]:
+            if load[q] + w[i] <= cap * (1 + 1e-9):
+                break
+        else:
+            return np.inf, None
+        asg[i] = q
+        load[q] += w[i]
+        cost += w[i] * d[i, q]
+    if f is not None:
+        cost += float(np.sum(f[sites]))
+    return cost, asg
+
+
+def capacitated_local_search(Dp: np.ndarray, w: np.ndarray, start, cap: float, f=None, locked=(),
+                             neighbours: int = 20, top_demand: int = 30, max_passes: int = 30):
+    """Best-swap search with capacity-aware assignment. Any site may move next to any other
+    site or to one of the biggest demand centers."""
+    sites = list(start)
+    best, _ = capacitated_assignment(Dp, w, sites, cap, f)
+    near = np.argsort(Dp, axis=0)[1:neighbours + 1, :]          # column s: nearest cities to site s
+    big = list(np.argsort(-w)[:top_demand])
+    for _ in range(max_passes):
+        pool = set(big)
+        for s in sites:
+            pool.update(near[:, s].tolist())
+        move = None
+        for m in range(len(sites)):
+            if sites[m] in locked:
+                continue
+            for c in pool:
+                if c in sites:
+                    continue
+                trial = sites.copy()
+                trial[m] = c
+                cost, _ = capacitated_assignment(Dp, w, trial, cap, f)
+                if cost < best - 1e-6 and (move is None or cost < move[1]):
+                    move = (trial, cost)
+        if move is None:
+            break
+        sites, best = move
+    return sites, best
+
+
 def solve_facility_milp(D: np.ndarray, weights: np.ndarray, cand: np.ndarray, k: Optional[int],
                         site_costs: Optional[np.ndarray] = None, capacity: Optional[float] = None,
-                        forced: Optional[List[int]] = None, time_limit: float = 600.0):
+                        forced: Optional[List[int]] = None, time_limit: float = 600.0,
+                        strong_links: int = 8):
     n, m = D.shape[0], len(cand)
-    Dc = D[:, cand]
-    f = np.zeros(m) if site_costs is None else np.asarray(site_costs, dtype=float)[cand]
+    # work in demand shares and thousands of km: keeps HiGHS numerically comfortable
+    W = float(weights.sum())
+    weights = weights / W
+    Dc = D[:, cand] / 1000.0
+    f = np.zeros(m) if site_costs is None else np.asarray(site_costs, dtype=float)[cand] / (W * 1000.0)
+    capacity = None if capacity is None else capacity / W
     nx = n * m                                     # x_ij at column i*m + j, then y_j
     c = np.concatenate([(weights[:, None] * Dc).ravel(), f])
 
@@ -52,11 +113,17 @@ def solve_facility_milp(D: np.ndarray, weights: np.ndarray, cand: np.ndarray, k:
     # sum_j x_ij = 1
     A1 = coo_matrix((np.ones(nx), (np.repeat(np.arange(n), m), np.arange(nx))), shape=(n, nx + m))
     rows.append(LinearConstraint(A1, 1, 1))
-    # x_ij - y_j <= 0
-    r = np.arange(nx)
-    A2 = coo_matrix((np.concatenate([np.ones(nx), -np.ones(nx)]),
-                     (np.concatenate([r, r]), np.concatenate([r, nx + np.tile(np.arange(m), n)]))),
-                    shape=(nx, nx + m))
+    # x_ij - y_j <= 0. With a capacity limit, sum_i w_i x_ij <= C y_j already keeps closed sites
+    # empty, so these rows only tighten the relaxation; keeping them for each city's nearest
+    # candidates gives most of the benefit at a fraction of the size.
+    if capacity is None:
+        r = np.arange(nx)
+    else:
+        near = np.argsort(Dc, axis=1)[:, :min(strong_links, m)]
+        r = (np.arange(n)[:, None] * m + near).ravel()
+    A2 = coo_matrix((np.concatenate([np.ones(len(r)), -np.ones(len(r))]),
+                     (np.concatenate([np.arange(len(r)), np.arange(len(r))]), np.concatenate([r, nx + r % m]))),
+                    shape=(len(r), nx + m))
     rows.append(LinearConstraint(A2, -np.inf, 0))
     if capacity is not None:
         cols = np.arange(nx)
@@ -81,7 +148,7 @@ def solve_facility_milp(D: np.ndarray, weights: np.ndarray, cand: np.ndarray, k:
         raise RuntimeError(f"MILP failed: {res.message}")
     y = res.x[nx:] > 0.5
     x = res.x[:nx].reshape(n, m)
-    return {"open": cand[y], "x": x[:, y], "objective": float(res.fun), "status": res.message,
+    return {"open": cand[y], "x": x[:, y], "objective": float(res.fun) * W * 1000.0, "status": res.message,
             "mip_gap": float(getattr(res, "mip_gap", 0.0) or 0.0)}
 
 
@@ -137,10 +204,25 @@ class SeededMILPOptimizer(BaseOptimizer):
         km_cost = float(np.sum(np.min(Dp[:, km_result["medoid_indices"]], axis=1) * w))
         if f is not None:
             km_cost += float(f[km_result["medoid_indices"]].sum())
-        cand = candidate_sites(Dp, seeds, w, kwargs.get("neighbours", 40), kwargs.get("top_demand", 25), forced)
+        if cap is not None:
+            # With a capacity limit the uncapacitated sites are a poor guide (one center can't
+            # serve all of China), so the seeds come from a capacity-aware swap search instead,
+            # and the candidate list stays tight enough for the solver to prove its answer.
+            k_cap = max(k0, int(np.ceil(1.0 / cap_share - 1e-9)))
+            heur, heur_cost = capacitated_local_search(Dp, w, km_result["medoid_indices"][:k_cap] if k_cap <= k0 else
+                                                       km.fit(df, k_cap, distance_matrix=Dp, weight_column=weight_col)["medoid_indices"],
+                                                       cap, f, locked=forced)
+            km_cost = heur_cost
+            seeds = list(heur)
+            cand = candidate_sites(Dp, seeds, w, kwargs.get("neighbours", 15), kwargs.get("top_demand", 10), forced)
+            strong = len(cand)
+        else:
+            nb = kwargs.get("neighbours", 40 if n_clusters else 15)
+            cand = candidate_sites(Dp, seeds, w, nb, kwargs.get("top_demand", 25), forced)
+            strong = 8   # unused without a capacity limit: every x_ij <= y_j row is kept
 
         # 2. Exact solve over the candidate list
-        sol = solve_facility_milp(Dp, w, cand, n_clusters, f, cap, forced, kwargs.get("time_limit", 600.0))
+        sol = solve_facility_milp(Dp, w, cand, n_clusters, f, cap, forced, kwargs.get("time_limit", 600.0), strong)
         open_ = sol["open"]
         assign = np.argmax(sol["x"], axis=1)
         served = (sol["x"] * w[:, None]).sum(axis=0)
@@ -161,8 +243,8 @@ class SeededMILPOptimizer(BaseOptimizer):
                 "fit_time_seconds": time.time() - start,
                 "candidates": int(len(cand)),
                 "objective": sol["objective"],
-                "kmedoids_objective": km_cost,
-                "improvement_over_kmedoids": (km_cost - sol["objective"]) / km_cost if cap is None else None,
+                "kmedoids_objective": km_cost,   # capacity-aware heuristic's cost when capacity is set
+                "improvement_over_kmedoids": (km_cost - sol["objective"]) / km_cost,
                 "running_cost": float(f[open_].sum()) if f is not None else 0.0,
                 "solver_status": sol["status"],
                 "mip_gap": sol["mip_gap"],

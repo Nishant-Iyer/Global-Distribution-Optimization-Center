@@ -1,0 +1,312 @@
+{
+  "solvers": [
+    {
+      "distance": "straight line",
+      "weighting": "population",
+      "k": 3,
+      "kmeans": 2141.081479225568,
+      "kmedoids": 2096.373856828395,
+      "seeded_milp": 2096.373856828395,
+      "candidates": 294,
+      "milp_seconds": 34.739625215530396,
+      "sites": [
+        "Alexandria",
+        "Havana",
+        "Jingling"
+      ]
+    },
+    {
+      "distance": "straight line",
+      "weighting": "population",
+      "k": 5,
+      "kmeans": 1581.3259389718512,
+      "kmedoids": 1559.588825764655,
+      "seeded_milp": 1559.588825764655,
+      "candidates": 367,
+      "milp_seconds": 48.99394178390503,
+      "sites": [
+        "Sao Paulo",
+        "Alexandria",
+        "Gwalior",
+        "Macheng",
+        "Birmingham"
+      ]
+    },
+    {
+      "distance": "straight line",
+      "weighting": "population",
+      "k": 8,
+      "kmeans": 1130.7196551030024,
+      "kmedoids": 1103.2326280360544,
+      "seeded_milp": 1103.2326280360544,
+      "candidates": 457,
+      "milp_seconds": 62.32490038871765,
+      "sites": [
+        "Jakarta",
+        "Sao Paulo",
+        "Istanbul",
+        "Linyi",
+        "Yaounde",
+        "Hezhou",
+        "Kota",
+        "Birmingham"
+      ]
+    },
+    {
+      "distance": "straight line",
+      "weighting": "purchasing power",
+      "k": 3,
+      "kmeans": 1789.4623185792125,
+      "kmedoids": 1743.878020918592,
+      "seeded_milp": 1743.878020918592,
+      "candidates": 232,
+      "milp_seconds": 23.483701705932617,
+      "sites": [
+        "Lu'an",
+        "Vienna",
+        "Louisville"
+      ]
+    },
+    {
+      "distance": "straight line",
+      "weighting": "purchasing power",
+      "k": 5,
+      "kmeans": 1449.25290431675,
+      "kmedoids": 1379.0237386245694,
+      "seeded_milp": 1379.0237386245694,
+      "candidates": 342,
+      "milp_seconds": 44.67976903915405,
+      "sites": [
+        "Sao Paulo",
+        "Lu'an",
+        "Phoenix",
+        "Vienna",
+        "Baltimore"
+      ]
+    },
+    {
+      "distance": "straight line",
+      "weighting": "purchasing power",
+      "k": 8,
+      "kmeans": 1015.4280019882697,
+      "kmedoids": 983.1948905866103,
+      "seeded_milp": 981.5959344024228,
+      "candidates": 476,
+      "milp_seconds": 89.22044014930725,
+      "sites": [
+        "Sao Paulo",
+        "Qingdao",
+        "Melbourne",
+        "Phoenix",
+        "Kuwait City",
+        "Baltimore",
+        "Hezhou",
+        "Frankfurt"
+      ]
+    },
+    {
+      "distance": "road and sea",
+      "weighting": "population",
+      "k": 3,
+      "kmeans": 2941.9850422744953,
+      "kmedoids": 2746.5318317187875,
+      "seeded_milp": 2746.5318317187875,
+      "candidates": 342,
+      "milp_seconds": 57.60257840156555,
+      "sites": [
+        "Miami",
+        "Tel Aviv-Yafo",
+        "Daye"
+      ]
+    },
+    {
+      "distance": "road and sea",
+      "weighting": "population",
+      "k": 5,
+      "kmeans": 2152.728912610005,
+      "kmedoids": 1967.7856501393894,
+      "seeded_milp": 1967.7856501393894,
+      "candidates": 405,
+      "milp_seconds": 60.76468777656555,
+      "sites": [
+        "Lu'an",
+        "Konya",
+        "Raipur",
+        "New Orleans",
+        "Libreville"
+      ]
+    },
+    {
+      "distance": "road and sea",
+      "weighting": "population",
+      "k": 8,
+      "kmeans": 1475.3110653852686,
+      "kmedoids": 1413.4726593984803,
+      "seeded_milp": 1413.4726593984803,
+      "candidates": 442,
+      "milp_seconds": 60.169888496398926,
+      "sites": [
+        "Jakarta",
+        "Sao Paulo",
+        "Zaozhuang",
+        "Konya",
+        "Hezhou",
+        "Bhopal",
+        "New Orleans",
+        "Libreville"
+      ]
+    },
+    {
+      "distance": "road and sea",
+      "weighting": "purchasing power",
+      "k": 3,
+      "kmeans": 2296.3326672851676,
+      "kmedoids": 2200.2173981065093,
+      "seeded_milp": 2200.2173981065093,
+      "candidates": 239,
+      "milp_seconds": 25.310261726379395,
+      "sites": [
+        "Chuzhou",
+        "Milan",
+        "Louisville"
+      ]
+    },
+    {
+      "distance": "road and sea",
+      "weighting": "purchasing power",
+      "k": 5,
+      "kmeans": 1876.8182924170578,
+      "kmedoids": 1770.424479004504,
+      "seeded_milp": 1738.657366871663,
+      "candidates": 318,
+      "milp_seconds": 42.23998689651489,
+      "sites": [
+        "Foshan",
+        "Washington",
+        "Xinpu",
+        "Phoenix",
+        "Milan"
+      ]
+    },
+    {
+      "distance": "road and sea",
+      "weighting": "purchasing power",
+      "k": 8,
+      "kmeans": 1310.7707143311115,
+      "kmedoids": 1234.2317466404934,
+      "seeded_milp": 1234.2317466404934,
+      "candidates": 386,
+      "milp_seconds": 48.594045639038086,
+      "sites": [
+        "Guangzhou",
+        "Washington",
+        "Melbourne",
+        "Xinpu",
+        "Phoenix",
+        "Kuwait City",
+        "Cologne",
+        "Sao Bernardo do Campo"
+      ]
+    }
+  ],
+  "capacity": [
+    {
+      "capacity_share": null,
+      "avg_km": 1967.7856501393896,
+      "largest_share": 0.5095331463855035,
+      "sites": [
+        "Lu'an",
+        "Konya",
+        "Raipur",
+        "New Orleans",
+        "Libreville"
+      ],
+      "seconds": 60.768510818481445
+    },
+    {
+      "capacity_share": 0.3,
+      "avg_km": 2090.568027188091,
+      "largest_share": 0.30000000000000016,
+      "sites": [
+        "Linyi",
+        "Miami",
+        "Izmir",
+        "Zhaoqing",
+        "Indore"
+      ],
+      "seconds": 111.54942083358765
+    },
+    {
+      "capacity_share": 0.25,
+      "avg_km": 2169.7081068349917,
+      "largest_share": 0.25000000000000006,
+      "sites": [
+        "Linyi",
+        "Miami",
+        "Izmir",
+        "Vishakhapatnam",
+        "Yiyang"
+      ],
+      "seconds": 244.8319811820984
+    }
+  ],
+  "running_cost": [
+    {
+      "site_cost_km": 100,
+      "centers": 16,
+      "avg_km": 1077.5760350521018,
+      "sites": [
+        "Jakarta, Indonesia",
+        "Delhi, India",
+        "Guangzhou, China",
+        "Mumbai, India",
+        "Sao Paulo, Brazil",
+        "Mexico City, Mexico",
+        "Kolkata, India",
+        "Lagos, Nigeria",
+        "Linyi, China",
+        "Alexandria, Egypt",
+        "Gaoping, China",
+        "Havana, Cuba",
+        "Aleppo, Syria",
+        "Minsk, Belarus",
+        "Bujumbura, Burundi",
+        "San Cristobal, Venezuela"
+      ],
+      "seconds": 25.56965708732605
+    },
+    {
+      "site_cost_km": 200,
+      "centers": 11,
+      "avg_km": 1270.9935976119702,
+      "sites": [
+        "Jakarta, Indonesia",
+        "Sao Paulo, Brazil",
+        "Lagos, Nigeria",
+        "Monterrey, Mexico",
+        "Zaozhuang, China",
+        "Hezhou, China",
+        "Minsk, Belarus",
+        "Bhopal, India",
+        "Maracaibo, Venezuela",
+        "Bujumbura, Burundi",
+        "Homs, Syria"
+      ],
+      "seconds": 11.993100643157959
+    },
+    {
+      "site_cost_km": 400,
+      "centers": 6,
+      "avg_km": 1928.8818969781435,
+      "sites": [
+        "Tongshan, China",
+        "Haiphong, Vietnam",
+        "Aleppo, Syria",
+        "Port Harcourt, Nigeria",
+        "Bhopal, India",
+        "Maracaibo, Venezuela"
+      ],
+      "seconds": 11.048303127288818
+    }
+  ]
+}

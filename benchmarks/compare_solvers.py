@@ -1,6 +1,6 @@
 """Benchmarks on the 1,000 largest cities.
 
-    python benchmarks/compare_solvers.py            # everything (about 25 minutes)
+    python benchmarks/compare_solvers.py            # everything (about 40 minutes)
     python benchmarks/compare_solvers.py --quick    # 5 centers only
 
 Prints three tables and writes benchmarks/results.json:
@@ -71,7 +71,7 @@ def main(quick=False):
     D = mats["road and sea"]
     w = df["population"].values.astype(float)
     print("\nCapacity limits (5 centers, road and sea, population)")
-    for cap in (None, 0.30, 0.25, 0.22):
+    for cap in (None, 0.30, 0.25):
         r = SeededMILPOptimizer().fit(df, 5, distance_matrix=D, capacity_share=cap)
         shares = sorted((d["share_of_demand"] for d in r["dc_locations"]), reverse=True)
         row = {"capacity_share": cap, "avg_km": r["total_distance"] / w.sum(), "largest_share": shares[0],
