@@ -40,7 +40,7 @@ Cuba,CUB,Latin America & Caribbean ,Upper middle income,9605.3,2020,World Bank,2
 Cyprus,CYP,Europe & Central Asia,High income,41783.1,2025,World Bank,3.2,2022,World Bank,0.6471,2025,World Bank (derived)
 Czechia,CZE,Europe & Central Asia,High income,35917.3,2025,World Bank,3.3,2022,World Bank,0.5938,2025,World Bank (derived)
 Côte d’Ivoire,CIV,Sub-Saharan Africa ,Lower middle income,3050.1,2025,World Bank,3.08,2018,World Bank,0.3716,2025,World Bank (derived)
-Denmark,GRL,Europe & Central Asia,High income,58499.0,2023,World Bank,3.6,,imputed: median of High income countries,0.7414,2023,World Bank (derived)
+Denmark,DNK,Europe & Central Asia,High income,76970.2,2025,World Bank,4.1,2022,World Bank,0.9249,2025,World Bank (derived)
 Djibouti,DJI,"Middle East, North Africa, Afghanistan & Pakistan",Lower middle income,3905.6,2025,World Bank,2.7,2022,World Bank,0.4621,2025,World Bank (derived)
 Dominican Republic,DOM,Latin America & Caribbean ,Upper middle income,11059.2,2025,World Bank,2.6,2022,World Bank,0.3851,2025,World Bank (derived)
 Ecuador,ECU,Latin America & Caribbean ,Upper middle income,7125.3,2025,World Bank,2.88,2018,World Bank,0.4252,2025,World Bank (derived)
@@ -52,7 +52,7 @@ Estonia,EST,Europe & Central Asia,High income,34417.6,2025,World Bank,3.6,2022,W
 Ethiopia,ETH,Sub-Saharan Africa ,Low income,932.7,2025,World Bank,2.3768,2016,World Bank,0.2575,2025,World Bank (derived)
 Fiji,FJI,East Asia & Pacific,Upper middle income,6642.0,2025,World Bank,2.3,2022,World Bank,0.4065,2025,World Bank (derived)
 Finland,FIN,Europe & Central Asia,High income,56148.6,2025,World Bank,4.2,2022,World Bank,0.8522,2025,World Bank (derived)
-France,NCL,East Asia & Pacific,High income,29213.2,2024,World Bank,3.6,,imputed: median of High income countries,0.6394,,imputed: median of High income countries
+France,FRA,Europe & Central Asia,High income,48985.7,2025,World Bank,3.9,2022,World Bank,0.7657,2025,World Bank (derived)
 Gabon,GAB,Sub-Saharan Africa ,Upper middle income,8263.0,2025,World Bank,2.4,2022,World Bank,0.3719,2025,World Bank (derived)
 "Gambia, The",GMB,Sub-Saharan Africa ,Low income,919.1,2025,World Bank,2.3,2022,World Bank,0.248,2025,World Bank (derived)
 Georgia,GEO,Europe & Central Asia,Upper middle income,9691.5,2025,World Bank,2.7,2022,World Bank,0.3295,2025,World Bank (derived)
@@ -74,7 +74,7 @@ Indonesia,IDN,East Asia & Pacific,Upper middle income,5059.6,2025,World Bank,3.0
 Iran,IRN,"Middle East, North Africa, Afghanistan & Pakistan",Upper middle income,3924.4,2025,World Bank,2.3,2022,World Bank,0.1992,2025,World Bank (derived)
 Iraq,IRQ,"Middle East, North Africa, Afghanistan & Pakistan",Upper middle income,5409.7,2025,World Bank,2.4,2022,World Bank,0.3792,2025,World Bank (derived)
 Ireland,IRL,Europe & Central Asia,High income,131592.5,2025,World Bank,3.6,2022,World Bank,0.8485,2025,World Bank (derived)
-Israel,PSE,"Middle East, North Africa, Afghanistan & Pakistan",Lower middle income,3171.1,2025,World Bank,2.5,,imputed: median of Lower middle income countries,0.6343,2025,World Bank (derived)
+Israel,ISR,"Middle East, North Africa, Afghanistan & Pakistan",High income,60336.8,2025,World Bank,3.6,2022,World Bank,1.0104,2025,World Bank (derived)
 Italy,ITA,Europe & Central Asia,High income,43308.6,2025,World Bank,3.7,2022,World Bank,0.6896,2025,World Bank (derived)
 Jamaica,JAM,Latin America & Caribbean ,Upper middle income,8002.9,2025,World Bank,2.5,2022,World Bank,0.6021,2025,World Bank (derived)
 Japan,JPN,East Asia & Pacific,High income,35951.0,2025,World Bank,3.9,2022,World Bank,0.6487,2025,World Bank (derived)
@@ -83,7 +83,7 @@ Kazakhstan,KAZ,Europe & Central Asia,Upper middle income,14692.1,2025,World Bank
 Kenya,KEN,Sub-Saharan Africa ,Lower middle income,2362.9,2025,World Bank,2.81,2018,World Bank,0.3368,2025,World Bank (derived)
 "Korea, North",PRK,East Asia & Pacific,Low income,880.8,,imputed: median of Low income countries,2.3768,,imputed: median of Low income countries,0.349,,imputed: median of Low income countries
 "Korea, South",KOR,East Asia & Pacific,High income,36227.0,2025,World Bank,3.8,2022,World Bank,0.5739,2025,World Bank (derived)
-Kosovo,KOS,,Unknown,6834.3,,imputed: median of Unknown countries,2.7,,imputed: median of Unknown countries,0.4068,,imputed: median of Unknown countries
+Kosovo,KOS,,Unknown,7089.0,,imputed: median of Unknown countries,2.7,,imputed: median of Unknown countries,0.409,,imputed: median of Unknown countries
 Kuwait,KWT,"Middle East, North Africa, Afghanistan & Pakistan",High income,32312.3,2025,World Bank,3.2,2022,World Bank,0.5722,2025,World Bank (derived)
 Kyrgyzstan,KGZ,Europe & Central Asia,Lower middle income,3081.0,2025,World Bank,2.3,2022,World Bank,0.3342,2025,World Bank (derived)
 Laos,LAO,East Asia & Pacific,Lower middle income,2324.8,2025,World Bank,2.4,2022,World Bank,0.2239,2025,World Bank (derived)
@@ -108,7 +108,7 @@ Mozambique,MOZ,Sub-Saharan Africa ,Low income,626.9,2025,World Bank,2.6841,2016,
 Namibia,NAM,Sub-Saharan Africa ,Lower middle income,4875.9,2025,World Bank,2.9,2022,World Bank,0.4068,2025,World Bank (derived)
 Nepal,NPL,South Asia,Lower middle income,1535.9,2025,World Bank,2.51,2018,World Bank,0.2487,2025,World Bank (derived)
 Netherlands,NLD,Europe & Central Asia,High income,73683.9,2025,World Bank,4.1,2022,World Bank,0.8438,2025,World Bank (derived)
-New Caledonia,NCL,East Asia & Pacific,High income,29213.2,2024,World Bank,3.6,,imputed: median of High income countries,0.6394,,imputed: median of High income countries
+New Caledonia,NCL,East Asia & Pacific,High income,29213.2,2024,World Bank,3.6,,imputed: median of High income countries,0.6471,,imputed: median of High income countries
 New Zealand,NZL,East Asia & Pacific,High income,49591.0,2025,World Bank,3.6,2022,World Bank,0.8647,2025,World Bank (derived)
 Nicaragua,NIC,Latin America & Caribbean ,Lower middle income,3173.3,2025,World Bank,2.5,2022,World Bank,0.3418,2025,World Bank (derived)
 Niger,NER,Sub-Saharan Africa ,Low income,775.4,2025,World Bank,2.07,2018,World Bank,0.3561,2025,World Bank (derived)
@@ -146,7 +146,7 @@ Suriname,SUR,Latin America & Caribbean ,Upper middle income,7069.9,2025,World Ba
 Sweden,SWE,Europe & Central Asia,High income,63133.2,2025,World Bank,4.0,2022,World Bank,0.8705,2025,World Bank (derived)
 Switzerland,CHE,Europe & Central Asia,High income,114769.0,2025,World Bank,4.1,2022,World Bank,1.1196,2025,World Bank (derived)
 Syria,SYR,"Middle East, North Africa, Afghanistan & Pakistan",Low income,1056.8,2022,World Bank,2.3,2022,World Bank,0.2154,2022,World Bank (derived)
-Taiwan,TWN,,High income,32339.0,2023,IMF WEO,3.6,,imputed: median of High income countries,0.6394,,imputed: median of High income countries
+Taiwan,TWN,,High income,32339.0,2023,IMF WEO,3.6,,imputed: median of High income countries,0.6471,,imputed: median of High income countries
 Tajikistan,TJK,Europe & Central Asia,Lower middle income,1637.3,2025,World Bank,2.5,2022,World Bank,0.2764,2025,World Bank (derived)
 Tanzania,TZA,Sub-Saharan Africa ,Lower middle income,1318.8,2025,World Bank,2.9902,2016,World Bank,0.295,2025,World Bank (derived)
 Thailand,THA,East Asia & Pacific,Upper middle income,8056.6,2025,World Bank,3.5,2022,World Bank,0.3069,2025,World Bank (derived)
