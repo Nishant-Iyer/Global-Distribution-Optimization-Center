@@ -4,8 +4,9 @@ Download country indicators from the World Bank API for every country in the dat
 Writes gdoc_opt/country_indicators.csv with, per country:
   gdp_per_capita   GDP per capita, current US$ (NY.GDP.PCAP.CD), most recent year available
   lpi              Logistics Performance Index, overall score 1-5 (LP.LPI.OVRL.XQ), most recent edition
-  price_level      Price level ratio of PPP conversion factor to market exchange rate (PA.NUS.PPPC.RF),
-                   i.e. how expensive the country is relative to the US (US = 1). Used as a site running-cost index.
+  price_level      GDP per capita at market prices divided by GDP per capita at purchasing-power parity
+                   (NY.GDP.PCAP.CD / NY.GDP.PCAP.PP.CD): how expensive the country is relative to the
+                   US (US = 1). Used as a site running-cost index.
 and the year of each value. A value the World Bank doesn't publish is imputed with the median of
 countries in the same income group, and flagged in the *_source column.
 
@@ -24,7 +25,7 @@ API = "https://api.worldbank.org/v2"
 INDICATORS = {
     "gdp_per_capita": "NY.GDP.PCAP.CD",
     "lpi": "LP.LPI.OVRL.XQ",
-    "price_level": "PA.NUS.PPPC.RF",
+    "gdp_per_capita_ppp": "NY.GDP.PCAP.PP.CD",
 }
 # Dataset country names that differ from Natural Earth / ISO naming
 MANUAL_ISO3 = {
@@ -77,13 +78,19 @@ def main():
             code = row["countryiso3code"]
             if code in values and row["value"] is not None:
                 values[code][col] = (float(row["value"]), int(row["date"]), "World Bank")
+    for code in codes:
+        v = values[code]
+        if "gdp_per_capita" in v and "gdp_per_capita_ppp" in v:
+            v["price_level"] = (v["gdp_per_capita"][0] / v["gdp_per_capita_ppp"][0],
+                                min(v["gdp_per_capita"][1], v["gdp_per_capita_ppp"][1]), "World Bank (derived)")
     for code, vals in MANUAL_VALUES.items():
         for col, v in vals.items():
             values[code].setdefault(col, v)
 
     income = {c: (meta.get(c, {}).get("income") or MANUAL_INCOME.get(c, "Unknown")) for c in codes}
     medians = {}
-    for col in INDICATORS:
+    COLUMNS = ["gdp_per_capita", "lpi", "price_level"]
+    for col in COLUMNS:
         for grp in set(income.values()):
             vs = [values[c][col][0] for c in codes if income[c] == grp and col in values[c]]
             medians[(col, grp)] = statistics.median(vs) if vs else None
@@ -93,7 +100,7 @@ def main():
     rows = []
     for name, code in sorted(iso.items()):
         row = {"country": name, "iso3": code, "region": meta.get(code, {}).get("region", ""), "income_group": income[code]}
-        for col in INDICATORS:
+        for col in COLUMNS:
             if col in values[code]:
                 v, year, src = values[code][col]
             else:
@@ -108,7 +115,7 @@ def main():
         w = csv.DictWriter(fh, fieldnames=list(rows[0].keys()))
         w.writeheader()
         w.writerows(rows)
-    for col in INDICATORS:
+    for col in COLUMNS:
         n = sum(1 for r in rows if not r[f"{col}_source"].startswith("imputed"))
         print(f"{col}: {n} of {len(rows)} countries from source data")
     missing = sorted(set(pd.read_csv(os.path.join(ROOT, "final_dataset.csv"))["country"].dropna()) - set(iso))
