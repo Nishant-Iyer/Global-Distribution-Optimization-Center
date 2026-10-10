@@ -48,12 +48,13 @@ def country_iso3():
     names = sorted(df["country"].dropna().unique())
     geo = json.load(open(os.path.join(ROOT, "gdoc_opt", "countries.geojson")))
     index = {}
-    for f in geo["features"]:
-        p = f["properties"]
-        code = p["iso_a3"] if p["iso_a3"] != "-99" else p["adm0_a3"]
-        for k in ("name", "name_long", "admin", "formal_en", "sovereignt", "geounit", "brk_name", "name_sort"):
+    # exact names first; never the sovereign state's name, which would map Israel to the West Bank
+    for k in ("admin", "name", "name_long", "geounit", "brk_name", "formal_en", "name_sort"):
+        for f in geo["features"]:
+            p = f["properties"]
+            code = p["iso_a3"] if p["iso_a3"] != "-99" else p["adm0_a3"]
             if p.get(k):
-                index[p[k].lower()] = code
+                index.setdefault(p[k].lower(), code)
     out = {}
     for n in names:
         code = MANUAL_ISO3.get(n) or index.get(n.lower())
