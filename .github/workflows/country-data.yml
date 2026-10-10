@@ -1,0 +1,34 @@
+name: Refresh country indicators
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "scripts/fetch_country_data.py"
+      - ".github/workflows/country-data.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install pandas
+      - name: Download World Bank indicators
+        run: python scripts/fetch_country_data.py
+      - name: Commit results
+        run: |
+          git config user.name "Nishant Iyer"
+          git config user.email "111642900+Nishant-Iyer@users.noreply.github.com"
+          git add gdoc_opt/country_indicators.csv
+          if git diff --cached --quiet; then echo "No changes"; exit 0; fi
+          git commit -m "Refresh World Bank country indicators"
+          git pull --rebase origin main
+          git push origin HEAD:main
