@@ -26,6 +26,31 @@ This system transitions a simple clustering notebook into an absolute overkill s
 
 ---
 
+## 📊 Results
+
+Average distance from a person to their nearest distribution center (km), over the 1,000 largest cities in the dataset (129 countries, about 56% of the dataset's population). Lower is better; best per row in bold.
+
+| Demand weighting | Centers | K-Means | K-Medoids | MILP (top-50 candidates) |
+|---|---|---|---|---|
+| Population | 3 | 2,141 | **2,096** | 2,145 |
+| Population | 5 | 1,581 | **1,560** | 1,609 |
+| Population | 8 | 1,131 | **1,103** | 1,152 |
+| Purchasing power | 3 | 1,863 | **1,807** | 1,919 |
+| Purchasing power | 5 | 1,499 | **1,429** | 1,470 |
+| Purchasing power | 8 | 1,072 | **1,019** | 1,069 |
+
+**Why the "exact" MILP doesn't win:** it is exact only over its candidate list, and by default only the 50 most populous cities may host a center. The best sites are often smaller, well-placed cities. Widening the candidate list closes the gap (5 centers, population weighting: 1,609 km with 50 candidates, 1,569 with 100, 1,565 with 400 in 74 s), while K-Medoids considers all 1,000 cities and reaches 1,560 km in under a second.
+
+**Fixed in this version:**
+- K-Means projected cluster centers to latitude/longitude without normalizing them back onto the sphere, which pulled every center toward the equator (5 centers: 1,634 → 1,581 km after the fix).
+- K-Medoids stopped after 50 swaps rather than at a local optimum, and used an unseeded random start, so results changed run to run. It now applies the best swap each pass until none helps, with a fixed seed.
+
+**Known limitation:** GDP per capita and logistics (LPI) scores are filled in for 36 countries; every other country uses placeholder values (6,000 USD, LPI 2.8), which matters for the purchasing-power and logistics-penalty options.
+
+Reproduce with `python benchmarks/compare_solvers.py`.
+
+**[Try it in your browser](https://www.konnectingnots.com/demos/distribution.html)**: pick the number of centers, weighting and logistics penalty, or lock in a city, and it re-solves live.
+
 ## 🛠️ Installation & Setup
 
 ### Local Setup

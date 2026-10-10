@@ -16,12 +16,14 @@ class KMedoidsOptimizer(BaseOptimizer):
             **kwargs:
                 metric (str): 'haversine' or 'geodesic'. Default is 'haversine'.
                 weight_column (str): Column to use for demand weights. Default is 'population'.
-                max_iter (int): Maximum swap iterations. Default is 50.
+                max_iter (int): Maximum improvement passes. Default is 200.
+                random_state (int): Seed for the k-means++ style start. Default is 0.
         """
         start_time = time.time()
         metric = kwargs.get("metric", "haversine")
         weight_col = kwargs.get("weight_column", "population")
-        max_iter = kwargs.get("max_iter", 50)
+        max_iter = kwargs.get("max_iter", 200)
+        rng = np.random.default_rng(kwargs.get("random_state", 0))
         lpi_factor = kwargs.get("lpi_factor", 0.0)
         
         n = len(df)
@@ -52,38 +54,31 @@ class KMedoidsOptimizer(BaseOptimizer):
             prob = prob / np.sum(prob)
             
             # Select next medoid
-            next_medoid = np.random.choice(n, p=prob)
+            next_medoid = rng.choice(n, p=prob)
             medoids.append(int(next_medoid))
             
         medoids = np.array(medoids)
         
-        # 3. PAM Swap Refinement Loop (Vectorized first-improvement)
+        # 3. PAM swap refinement: each pass evaluates every (medoid, candidate) swap
+        #    and applies the best one, until no swap lowers the cost (a true local optimum).
         best_cost = self._calculate_cost(medoids, D_penalized, weights)
-        
-        improved = True
         iterations = 0
-        while improved and iterations < max_iter:
-            improved = False
+        while iterations < max_iter:
             iterations += 1
-            
+            best_swap, best_swap_cost = None, best_cost
             for i in range(n_clusters):
-                # Try swapping medoid i with some non-medoid city
-                for j in range(n):
-                    if j in medoids:
-                        continue
-                    
-                    test_medoids = medoids.copy()
-                    test_medoids[i] = j
-                    
-                    cost = self._calculate_cost(test_medoids, D_penalized, weights)
-                    if cost < best_cost:
-                        best_cost = cost
-                        medoids = test_medoids
-                        improved = True
-                        break  # First-improvement swap
-                if improved:
-                    break
-                    
+                others = np.delete(medoids, i)
+                dist_others = np.min(D_penalized[:, others], axis=1) if len(others) else np.full(n, np.inf)
+                # cost of replacing medoid i with each candidate j, for all j at once
+                swap_costs = (np.minimum(dist_others[:, np.newaxis], D_penalized) * weights[:, np.newaxis]).sum(axis=0)
+                j = int(np.argmin(swap_costs))
+                if swap_costs[j] < best_swap_cost - 1e-9:
+                    best_swap, best_swap_cost = (i, j), swap_costs[j]
+            if best_swap is None:
+                break
+            medoids[best_swap[0]] = best_swap[1]
+            best_cost = best_swap_cost
+
         # 4. Final assignments (based on penalized distances)
         closest_medoid_indices = np.argmin(D_penalized[:, medoids], axis=1)
         

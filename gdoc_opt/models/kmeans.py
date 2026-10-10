@@ -39,11 +39,13 @@ class KMeansOptimizer(BaseOptimizer):
         # Map centroids back to the closest actual cities
         for cluster_id in range(n_clusters):
             # Centroid of the cluster
-            c_x, c_y, c_z = centroids[cluster_id]
+            # The weighted mean of points on the sphere lies inside it, so normalize
+            # back onto the surface before converting to latitude / longitude.
+            c_x, c_y, c_z = centroids[cluster_id] / np.linalg.norm(centroids[cluster_id])
             
             # Project back to spherical coordinates
             lon_c = np.degrees(np.arctan2(c_y, c_x))
-            lat_c = np.degrees(np.arcsin(c_z))
+            lat_c = np.degrees(np.arcsin(np.clip(c_z, -1.0, 1.0)))
             
             # Find the closest city in this cluster to the centroid
             cluster_mask = df["cluster"] == cluster_id
