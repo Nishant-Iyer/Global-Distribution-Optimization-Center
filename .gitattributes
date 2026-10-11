@@ -1,1 +1,3 @@
-*.ipynb linguist-language=Python\n
+# Count notebooks as Python and exported notebook HTML as generated, so the repo language shows correctly
+*.ipynb linguist-language=Python
+*.html linguist-generated=true

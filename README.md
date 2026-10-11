@@ -1,35 +1,29 @@
-# Global Distribution Optimization Center (GDOC)
+# Global Distribution Center Placement
 
-🌐 **Enterprise-Grade Global Supply Chain Facility Location & Spatial Optimization Platform.**
+Where should a company put its distribution centers to serve customers worldwide? This project treats it as the classic facility location problem used in supply chain network design: choose sites that minimize demand-weighted freight distance across the 1,000 largest cities (129 countries), optionally with capacity limits and site running costs. It compares fast heuristics against an exact mixed-integer solver and reports where each one falls short.
 
-This system transitions a simple clustering notebook into an absolute overkill supply chain planning system. It equips analysts and planners with mathematical solvers, REST API endpoints, and a rich, interactive 3D Globe dashboard to perform multi-scenario distribution network optimization.
+**[Live demo](https://www.konnectingnots.com/demos/distribution.html)** · **[Case study](https://www.konnectingnots.com/projects/distribution-centers.html)**
 
----
+## Approach
 
-## 🚀 Key Features
+**Solvers**
+- **K-Means** on 3D Cartesian coordinates, projected back to the sphere: a fast baseline.
+- **K-Medoids (PAM)** on a precomputed distance matrix, so every center is a real city. This is the p-median problem, the standard formulation for uncapacitated facility location.
+- **Spherical gradient descent** in PyTorch, keeping centers on the unit sphere at each step.
+- **MILP facility location** (uncapacitated and capacitated) with PuLP/CBC.
+- **K-Medoids-seeded MILP:** K-Medoids proposes candidate sites, then HiGHS (via SciPy) proves the answer optimal on that list or improves it, with optional capacity limits and per-site running costs.
 
-### 1. Advanced Math & Optimization Solvers
-- **K-Means (Euclidean 3D)**: Fast baseline clustering operating on Cartesian coordinates projected back to the WGS-84 sphere.
-- **K-Medoids (Exact Geodesic)**: Vectorized PAM (Partitioning Around Medoids) algorithm operating on pre-computed geodesic distance matrices.
-- **PyTorch Spherical Gradient Descent**: Adam optimizer performing gradient descent on the unit sphere $S^2$, projecting centers via $C \leftarrow \frac{C}{\|C\|_2}$ at each epoch.
-- **MILP Facility Location**: Solves the Uncapacitated and Capacitated Facility Location Problem (UFLP/CFLP) using the `CBC` solver via `PuLP`. Includes candidate site selection bounds to scale safely.
-- **K-Medoids-seeded MILP** (`SeededMILPOptimizer`): K-Medoids proposes the candidate sites, then HiGHS (via SciPy) confirms or improves the answer, with optional capacity limits and per-site running costs.
-
-### 2. Multi-Scenario & Variable Constraints
-- **Dynamic Demand Weighting**: Choose between **Raw Population** demand and **Purchasing Power Adjusted** ($Population \times GDP_{per capita}$) demand weighting.
-- **Infrastructure Readiness (LPI Index)**: Penalize placing distribution centers in countries with low logistics capabilities using a customizable weight multiplier $\beta$ on the distance function:
+**Scenario inputs**
+- **Demand weighting:** population, or population × GDP per capita as a proxy for purchasing power.
+- **Logistics quality:** a penalty based on the World Bank Logistics Performance Index (LPI), so countries with weaker infrastructure are less attractive:
   $$D'_{ij} = D_{ij} \times \left(1 + \beta \times \left(5.0 - \text{LPI}_j\right)\right)$$
-- **Scenario Planning (Forced DCs)**: Force placement in key supply chain hubs (e.g., Singapore, Rotterdam) and solve for the remaining slots.
-- **Road and Sea Distances**: Freight distance by road within a landmass and by road–sea–road between them.
-- **Capacity and Running Costs**: Cap the share of demand one center may serve, and charge each site a running cost scaled by its country's price level.
+- **Fixed sites:** lock in existing hubs (for example Singapore or Rotterdam) and solve for the rest.
+- **Road and sea distances:** road within a landmass, and road, sea and road again between landmasses.
+- **Capacity and running costs:** cap the share of demand one center may serve, and charge each site a running cost scaled by its country's price level.
 
-### 3. Application Stack
-- **FastAPI Backend Service**: Exposes high-throughput JSON optimization and benchmark endpoints.
-- **Streamlit Interactive 3D Globe**: Render networks in the browser, showing geodesic routing arcs, customer demand sizes, and DC profiles.
+**Delivery:** a FastAPI service for optimization and benchmark requests, and a Streamlit dashboard with a 3D globe of the network.
 
----
-
-## 📊 Results
+## Results
 
 Average distance from a person to their nearest distribution center (km), over the 1,000 largest cities in the dataset (129 countries). Lower is better.
 
@@ -85,9 +79,9 @@ Reproduce with `python benchmarks/compare_solvers.py` (about 40 minutes; results
 
 `gdoc_opt/country_indicators.csv` holds GDP per capita, the Logistics Performance Index and the price level (GDP per capita at market prices ÷ at PPP) for every country, from the World Bank API. Of the 129 countries in the top 1,000 cities, 128 have World Bank GDP, and 126 have LPI and price levels; the rest use the median of their income group, flagged in the `*_source` columns. Refresh it with `python scripts/fetch_country_data.py` or the **Refresh country indicators** GitHub Action.
 
-**[Try it in your browser](https://www.konnectingnots.com/demos/distribution.html)**: pick the number of centers, road-and-sea or straight-line distance, weighting, logistics penalty, running cost and capacity, or lock in a city, and it re-solves live.
+**[Try it in your browser](https://www.konnectingnots.com/demos/distribution.html):** pick the number of centers, road-and-sea or straight-line distance, weighting, logistics penalty, running cost and capacity, or lock in a city, and it re-solves live.
 
-## 🛠️ Installation & Setup
+## Setup
 
 ### Local Setup
 1. **Create and Activate Virtual Environment**:
@@ -107,28 +101,25 @@ Reproduce with `python benchmarks/compare_solvers.py` (about 40 minutes; results
    python -m unittest tests/test_optimizers.py
    ```
 
----
 
-## 🐳 Running with Containerization
+## Running with Docker
 
 ### Docker Compose
 Run both the API and Streamlit Dashboard concurrently:
 ```bash
 docker-compose up --build
 ```
-- **FastAPI API**: http://localhost:8000
-- **FastAPI Swagger Docs**: http://localhost:8000/docs
-- **Streamlit Dashboard**: http://localhost:8501
+- [FastAPI service](http://localhost:8000) on port 8000, with [interactive API docs](http://localhost:8000/docs)
+- [Streamlit dashboard](http://localhost:8501) on port 8501
 
 ### Kubernetes Manifests
-Deploy the platform onto a cluster (with services and replica controls):
+Deploy to a cluster (deployment, service and replica settings):
 ```bash
 kubectl apply -f k8s/deployment.yml
 ```
 
----
 
-## 📈 API Endpoints
+## API
 
 ### 1. Run Optimization: `POST /optimize`
 **Payload**:
@@ -146,9 +137,8 @@ kubectl apply -f k8s/deployment.yml
 ### 2. Run Comparative Models: `GET /compare`
 Allows comparing runtime, total distance, and selected sites across all solvers in one call.
 
----
 
-## 📊 Dashboard Usage
+## Dashboard
 
 ### Running Locally
 Run the dashboard locally using Streamlit:
@@ -157,10 +147,9 @@ streamlit run app.py
 ```
 Use the sidebar to change algorithms, toggle demand weighting modes, scale infrastructure readiness parameters, and add scenario constraints.
 
-### Deploying to Streamlit Community Cloud (GitHub Hosting)
-You can deploy this dashboard directly from GitHub for free using Streamlit Community Cloud:
-1. **Push this repository** to your GitHub account.
-2. Visit [Streamlit Share](https://share.streamlit.io/) and log in with your GitHub account.
-3. Click **New app**, then select your repository, branch, and set the Main file path to `app.py`.
-4. Click **Deploy!** Your interactive dashboard will be live and shared publicly.
+### Hosting
+The dashboard can be deployed on [Streamlit Community Cloud](https://share.streamlit.io/) with `app.py` as the main file.
 
+## License
+
+MIT. See [LICENSE](LICENSE).
