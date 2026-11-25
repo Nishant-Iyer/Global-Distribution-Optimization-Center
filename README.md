@@ -2,7 +2,7 @@
 
 Where should a company put its distribution centers to serve customers worldwide? This project treats it as the classic facility location problem used in supply chain network design: choose sites that minimize demand-weighted freight distance across the 1,000 largest cities (129 countries), optionally with capacity limits and site running costs. It compares fast heuristics against an exact mixed-integer solver and reports where each one falls short.
 
-**[Live demo](https://www.konnectingnots.com/demos/distribution.html)** · **[Case study](https://www.konnectingnots.com/projects/distribution-centers.html)**
+**[Live demo](https://nishant-iyer.github.io/demos/distribution.html)** · **[Case study](https://nishant-iyer.github.io/projects/distribution-centers.html)**
 
 ## Approach
 
@@ -79,7 +79,7 @@ Reproduce with `python benchmarks/compare_solvers.py` (about 40 minutes; results
 
 `gdoc_opt/country_indicators.csv` holds GDP per capita, the Logistics Performance Index and the price level (GDP per capita at market prices ÷ at PPP) for every country, from the World Bank API. Of the 129 countries in the top 1,000 cities, 128 have World Bank GDP, and 126 have LPI and price levels; the rest use the median of their income group, flagged in the `*_source` columns. Refresh it with `python scripts/fetch_country_data.py` or the **Refresh country indicators** GitHub Action.
 
-**[Try it in your browser](https://www.konnectingnots.com/demos/distribution.html):** pick the number of centers, road-and-sea or straight-line distance, weighting, logistics penalty, running cost and capacity, or lock in a city, and it re-solves live.
+**[Try it in your browser](https://nishant-iyer.github.io/demos/distribution.html):** pick the number of centers, road-and-sea or straight-line distance, weighting, logistics penalty, running cost and capacity, or lock in a city, and it re-solves live.
 
 ## Setup
 
